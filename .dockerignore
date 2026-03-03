@@ -1,0 +1,15 @@
+node_modules
+dist
+.git
+.DS_Store
+*.log
+*.local
+coverage
+tmp
+*.tmp
+.vscode
+.idea
+WEBSOCKET_GUIDE
+BOARD_ARTICLE_API
+claude.md
+.claude
