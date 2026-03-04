@@ -3,10 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { GamesModule } from './components/games/games.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
-import { UsersModule } from './components/users/users.module';
 import { AuthModule } from './components/auth/auth.module';
 import { MemberModule } from './components/member/member.module';
 import { ViewModule } from './components/view/view.module';
@@ -38,8 +36,6 @@ import { NotificationModule } from './components/notification/notification.modul
       // },
     }),
     DatabaseModule,
-    UsersModule,
-    GamesModule,
     AuthModule,
     MemberModule,
     ViewModule,
