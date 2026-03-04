@@ -251,14 +251,14 @@ export class PropertyService {
   public async getAllPropertiesByAdmin(input: AllPropertiesInquiry): Promise<Properties> {
     const { propertyStatus, propertyLocationList } = input.search;
 
-    console.log(input);
+    // console.log(input);
     const match: P = {};
     const sort: P = { [input.sort ?? 'createdAt']: input?.direction ?? Direction.DESC };
 
     if (propertyStatus) match.propertyStatus = propertyStatus;
     if (propertyLocationList) match.propertyLocation = { $in: propertyLocationList };
 
-    console.log(match);
+    // console.log(match);
 
     const result = await this.propertyModel
       .aggregate([
@@ -287,7 +287,7 @@ export class PropertyService {
 
     if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
-    console.log('getAllPropertiesByAdmin ==> result', result);
+    // console.log('getAllPropertiesByAdmin ==> result', result);
 
     return result[0];
   }

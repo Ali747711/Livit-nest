@@ -11,10 +11,10 @@ import { MemberStatus, MemberType } from 'src/libs/enums/member.enum';
 import type { ObjectId } from 'mongoose';
 import { MemberUpdate } from 'src/libs/dto/member/member.update';
 import { WithoutGuard } from '../auth/guards/without.guard';
-import { genFilenameForImage, shapeIntoMongoObjectId, validMimeTypes } from 'src/libs/config';
+import { shapeIntoMongoObjectId, validMimeTypes } from 'src/libs/config';
 import { GraphQLUpload, FileUpload } from 'graphql-upload-ts';
 import { Message } from 'src/libs/enums/comma.enum';
-import { createWriteStream, existsSync, mkdirSync } from 'fs';
+import { uploadToCloudinary } from 'src/libs/cloudinary';
 
 @Resolver()
 export class MemberResolver {
@@ -134,21 +134,14 @@ export class MemberResolver {
     const validMime = validMimeTypes.includes(mimetype);
     if (!validMime) throw new BadRequestException(Message.PROVIDE_ALLOWED_FORMAT);
 
-    const imageName = genFilenameForImage(filename);
-    const dir = `uploads/${target}`;
-    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-
-    const url = `${dir}/${imageName}`;
-    const stream = createReadStream();
-    const result = await new Promise((resolve, reject) => {
-      stream
-        .pipe(createWriteStream(url))
-        .on('finish', () => resolve(true))
-        .on('error', () => reject(false));
-    });
-
-    if (!result) throw new BadRequestException(Message.UPLOAD_FAILED);
-    return url;
+    console.log('Valid: ', validMime);
+    try {
+      const url = await uploadToCloudinary(createReadStream(), `uploads/${target}`);
+      return url;
+    } catch (err) {
+      console.error('imageUploader error:', err);
+      throw new BadRequestException(Message.UPLOAD_FAILED);
+    }
   }
 
   // UPLOAD IMAGES ===============
@@ -160,32 +153,17 @@ export class MemberResolver {
   ): Promise<string[]> {
     console.log('Mutation: imagesUploader');
 
-    const dir = `uploads/${target}`;
-    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-
-    const uploadedImages = [];
+    const uploadedImages: string[] = [];
     const promiseList = files.map(async (file: Promise<FileUpload>, index: number): Promise<void> => {
       try {
-        const { filename, mimetype, createReadStream } = await file;
+        const { mimetype, createReadStream } = await file;
         const validMime = validMimeTypes.includes(mimetype);
         if (!validMime) throw new Error(Message.PROVIDE_ALLOWED_FORMAT);
 
-        const imageName = genFilenameForImage(filename);
-        const url = `${dir}/${imageName}`;
-
-        const stream = createReadStream();
-
-        const result = await new Promise((resolve, reject) => {
-          stream
-            .pipe(createWriteStream(url))
-            .on('finish', () => resolve(true))
-            .on('error', () => reject(false));
-        });
-
-        if (!result) throw new Error(Message.UPLOAD_FAILED);
+        const url = await uploadToCloudinary(createReadStream(), `uploads/${target}`);
         uploadedImages[index] = url;
       } catch (error) {
-        console.log('Error: file missing!');
+        console.log('Error: file upload failed!', error);
       }
     });
 
