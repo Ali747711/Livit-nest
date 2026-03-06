@@ -8,7 +8,10 @@ import * as path from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.enableCors({ origin: true, credentials: true });
+  const allowedOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',')
+    : ['https://livit-next.vercel.app', 'http://localhost:3000'];
+  app.enableCors({ origin: allowedOrigins, credentials: true });
   app.useGlobalPipes(new ValidationPipe());
 
   app.use(graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 10 }));
