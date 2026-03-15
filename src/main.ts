@@ -10,7 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const allowedOrigins = process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',')
-    : ['https://livit-next.vercel.app', 'http://localhost:3000'];
+    : ['https://livit-next.vercel.app', 'http://localhost:3000', 'https://livit-platform.vercel.app'];
   app.enableCors({ origin: allowedOrigins, credentials: true });
   app.useGlobalPipes(new ValidationPipe());
 
